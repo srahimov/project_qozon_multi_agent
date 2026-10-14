@@ -11,7 +11,7 @@
   "vars": {
     "ALLOWED_ORIGIN": "https://srahimov.site",
     "QUESTIONS_PER_MINUTE": "5",
-    "QUESTIONS_PER_DAY": "100",
+    "QUESTIONS_PER_DAY": "200",
     "INACTIVITY_SECONDS": "300"
   },
   "containers": [

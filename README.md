@@ -1,4 +1,10 @@
-# Qozon Multimodal RAG
+# Qozon Multi Agent
+
+This separate project starts from the Qozon multimodal RAG backend. The agentic
+synthesis workflow is planned; the current implementation still uses extractive
+answering. Its copied Cloudflare configuration targets the existing Qozon API.
+Publishing this repository does not deploy it. Configure separate Cloudflare
+resources before deploying it as an independent application.
 
 A LangChain question API with local/cloud PDF retrieval, approved citations and input/output checks.
 
@@ -22,14 +28,14 @@ local environments and deployment caches are excluded. Historical report paths
 under `data/` refer to local execution evidence, not bundled public files.
 
 ```sh
-git clone https://github.com/srahimov/qozon-multimodal-rag.git
-cd qozon-multimodal-rag
+git clone https://github.com/srahimov/project_qozon_multi_agent.git
+cd project_qozon_multi_agent
 cp -n .env.example .env
 uv sync --locked
 uv run --locked pytest -q
 ```
 
-Run commands from this repository's root, called `project_Qozon` in the original
+Run commands from this repository's root, `project_qozon_multi_agent`, called `project_Qozon` in the original
 training notes. Configure your own provider and database credentials privately
 before making live requests. A clone does not include the deployed document
 index. For the demo's approved public citation registry, use
@@ -46,7 +52,7 @@ orchestration remains planned.
 
 ## Run locally
 
-From `project_Qozon`:
+From `project_qozon_multi_agent`:
 
 ```sh
 uv sync --locked
