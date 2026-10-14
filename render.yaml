@@ -1,0 +1,48 @@
+# Prepared option; importing this Blueprint creates a paid service and disk.
+# Use project_Qozon as the repository root. Deployment is a separate release step.
+services:
+  - type: web
+    name: qozon-public-qa
+    runtime: docker
+    plan: 1c-2g
+    region: ohio
+    numInstances: 1
+    autoDeployTrigger: "off"
+    healthCheckPath: /health
+    disk:
+      name: request-counters
+      mountPath: /var/qozon
+      sizeGB: 1
+    envVars:
+      - key: QOZON_CORS_ORIGINS
+        value: '["https://srahimov.site"]'
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_ASSETS_BUCKET
+        value: canon-of-medicine-chunks
+      - key: QOZON_RAG_BACKEND
+        value: supabase
+      - key: QOZON_RAG_ENABLED
+        value: "true"
+      - key: QOZON_OUTPUT_MAX_TOKENS
+        value: "512"
+      - key: QOZON_QUESTION_LIMITS_ENABLED
+        value: "true"
+      - key: QOZON_QUESTION_LIMITS_DATABASE
+        value: /var/qozon/request-limits.sqlite3
+      - key: QOZON_QUESTION_LIMIT_KEY
+        generateValue: true
+      - key: QOZON_QUESTIONS_PER_MINUTE
+        value: "5"
+      - key: QOZON_QUESTIONS_PER_DAY
+        value: "100"
+      - key: FORWARDED_ALLOW_IPS
+        sync: false
+      - key: LANGSMITH_TRACING
+        value: "false"
+      - key: QOZON_LANGSMITH_TRACE_CONTENT
+        value: "false"

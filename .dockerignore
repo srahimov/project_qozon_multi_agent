@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+!src/**
+!release/
+!release/publication.json
+**/__pycache__/
+**/*.pyc

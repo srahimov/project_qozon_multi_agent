@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "qozon-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-13",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "ALLOWED_ORIGIN": "https://srahimov.site",
+    "QUESTIONS_PER_MINUTE": "5",
+    "QUESTIONS_PER_DAY": "100",
+    "INACTIVITY_SECONDS": "300"
+  },
+  "containers": [
+    {
+      "class_name": "QozonBackend",
+      "scheduling_policy": "default",
+      "image": "registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-api-qozonbackend@sha256:77292e288afc8981a08b7408e1d9fbbf1e3234c2238aa57c08c989b6496aba0d",
+      "instance_type": "basic",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "BACKEND",
+        "class_name": "QozonBackend"
+      }
+    ]
+  },
+  "exports": {
+    "QozonBackend": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}

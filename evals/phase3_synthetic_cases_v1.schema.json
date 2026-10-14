@@ -1,0 +1,226 @@
+{
+  "$defs": {
+    "Expectation": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "enum": [
+            "answer",
+            "abstain_or_withhold",
+            "conflict_or_withhold",
+            "withhold",
+            "source_allow",
+            "source_hold",
+            "source_redact"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "answer_model_calls": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Answer Model Calls",
+          "type": "integer"
+        },
+        "contains": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Contains",
+          "type": "array"
+        },
+        "forbidden": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden",
+          "type": "array"
+        },
+        "cited_pages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Cited Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "outcome",
+        "answer_model_calls"
+      ],
+      "title": "Expectation",
+      "type": "object"
+    },
+    "FixtureSource": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "physical_page": {
+          "exclusiveMinimum": 0,
+          "title": "Physical Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text",
+        "physical_page"
+      ],
+      "title": "FixtureSource",
+      "type": "object"
+    },
+    "Phase3Case": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "grounding",
+            "conflict",
+            "citation",
+            "retrieved_injection",
+            "benign_control",
+            "privacy",
+            "availability"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "layer": {
+          "enum": [
+            "source_gate",
+            "service"
+          ],
+          "title": "Layer",
+          "type": "string"
+        },
+        "question": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/FixtureSource"
+          },
+          "maxItems": 4,
+          "title": "Sources",
+          "type": "array"
+        },
+        "model_reply": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Reply"
+        },
+        "fault": {
+          "anyOf": [
+            {
+              "enum": [
+                "retrieval_unavailable",
+                "model_timeout"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fault"
+        },
+        "expectation": {
+          "$ref": "#/$defs/Expectation"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "screening_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screening Category"
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "layer",
+        "question",
+        "expectation",
+        "purpose"
+      ],
+      "title": "Phase3Case",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": "phase3-synthetic-v1",
+      "title": "Version",
+      "type": "string"
+    },
+    "synthetic_only": {
+      "const": true,
+      "title": "Synthetic Only",
+      "type": "boolean"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/Phase3Case"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "version",
+    "synthetic_only",
+    "description",
+    "cases"
+  ],
+  "title": "Phase3Dataset",
+  "type": "object"
+}

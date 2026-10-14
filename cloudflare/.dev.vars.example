@@ -1,0 +1,6 @@
+# Synthetic/local values only. Real values belong in Worker secrets at deployment.
+# Never copy the project's ingestion credentials here.
+OPENAI_API_KEY=
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+QOZON_QUESTION_LIMIT_KEY=
