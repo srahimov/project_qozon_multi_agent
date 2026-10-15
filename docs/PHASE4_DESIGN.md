@@ -73,7 +73,7 @@ download route**, no private download proxy and no visitor Auth validation.
 The `pdf_rag` bucket stays private with Storage RLS enabled and no user policies.
 The existing secret remains confined to trusted ingestion/publication operations.
 
-Citations reuse the [existing publication resolver](../src/qozon_langchain/knowledge_base/pdf/publication.py).
+Citations reuse the [existing publication resolver](../src/qozon_multi_agent/knowledge_base/pdf/publication.py).
 The chunk's original-document hash, asset ID and source fingerprint must match the
 verified registry. URLs are constructed for the configured public bucket and
 content-addressed PNG/MD/JSON keys. PDF keys, invented URLs, changed fingerprints,
@@ -95,8 +95,8 @@ introduced after a direct Storage cache diagnostic; it is now removed because
 only already approved public assets are citations. Historical reports and applied
 migrations remain available; they do not describe the current visitor flow.
 
-Sources: [public reader](../src/qozon_langchain/knowledge_base/documents.py),
-[routes](../src/qozon_langchain/api/documents.py),
+Sources: [public reader](../src/qozon_multi_agent/knowledge_base/documents.py),
+[routes](../src/qozon_multi_agent/api/documents.py),
 [database checks](../tests/database/phase4_public_access.sql),
 [verification report](../data/evaluations/phase4-public-access-v1.json).
 

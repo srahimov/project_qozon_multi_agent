@@ -221,8 +221,9 @@ export class QozonBackend extends DurableObject<Env> {
       QOZON_QUESTION_LIMITS_ENABLED: "true", QOZON_QUESTION_LIMITS_BACKEND: "cloudflare",
       QOZON_QUESTION_LIMIT_KEY: env.QOZON_QUESTION_LIMIT_KEY,
       LANGSMITH_TRACING: "true", QOZON_LANGSMITH_TRACE_CONTENT: "false",
+      LANGSMITH_HIDE_INPUTS: "true", LANGSMITH_HIDE_OUTPUTS: "true",
       LANGSMITH_API_KEY: env.LANGSMITH_API_KEY,
-      LANGSMITH_PROJECT: "qozon-production",
+      LANGSMITH_PROJECT: "qozon-multi-agent-production",
       QOZON_CORS_ORIGINS: "[]",
     }});
     await container.setInactivityTimeout(positiveInteger(env.INACTIVITY_SECONDS, 3600) * 1000);

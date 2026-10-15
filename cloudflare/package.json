@@ -1,10 +1,9 @@
 {
-  "name": "qozon-cloudflare",
+  "name": "qozon-multi-agent-cloudflare",
   "private": true,
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "node --test test/*.test.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

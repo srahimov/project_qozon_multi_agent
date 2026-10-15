@@ -1,5 +1,5 @@
 [project]
-name = "qozon-langchain"
+name = "qozon-multi-agent"
 version = "0.1.0"
 description = "Qozon LangChain Phase 1 project foundation"
 readme = "README.md"
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-qozon-langchain = "qozon_langchain.__main__:main"
+qozon-multi-agent = "qozon_multi_agent.__main__:main"
 
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]
@@ -25,11 +25,7 @@ build-backend = "uv_build"
 
 [tool.uv]
 prerelease = "explicit"
-default-groups = ["dev", "ingestion"]
-
-[tool.pytest.ini_options]
-addopts = ["--import-mode=importlib"]
-markers = ["live_model: opt-in tests that contact OpenAI and may incur API charges"]
+default-groups = ["ingestion"]
 
 [dependency-groups]
 ingestion = [
@@ -41,8 +37,4 @@ ingestion = [
     "opentelemetry-sdk==1.44.0",
     "opentelemetry-semantic-conventions==0.65b0",
     "rank-bm25==0.2.2",
-]
-dev = [
-    "httpx==0.28.1",
-    "pytest==9.1.1",
 ]

@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "qozon-api",
+  "name": "qozon-multi-agent-api",
+  "account_id": "b0668461560fc6ead1ad55345b3437c4",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-13",
   "workers_dev": true,
@@ -18,7 +19,7 @@
     {
       "class_name": "QozonBackend",
       "scheduling_policy": "default",
-      "image": "registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-api-qozonbackend@sha256:77292e288afc8981a08b7408e1d9fbbf1e3234c2238aa57c08c989b6496aba0d",
+      "image": "../Dockerfile",
       "instance_type": "basic",
       "max_instances": 1
     }

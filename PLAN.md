@@ -1,5 +1,15 @@
 # Qozon: current execution history and next phases
 
+Current execution-only fork policy is recorded in the main platform blueprint below.
+
+Current fork package: `src/qozon_multi_agent/`. The inherited execution records below retain the original project and module names; the current fork plan is [MULTI_AGENT_PLAN.md](docs/MULTI_AGENT_PLAN.md).
+
+Current deployment target: independent `qozon-multi-agent-api` Cloudflare Worker,
+Basic container built from this fork's Dockerfile, separate Durable Object quota
+namespace and admission secret. Runtime secrets are supplied through ignored
+`cloudflare/.env.deploy`. Deployment publication status is recorded in README.md.
+The original `qozon-api` and separate React website are not retargeted.
+
 Reconciled on October 13, 2026; commands simplified and expanded Phase 3 acceptance verified on October 12. Current supported commands are in README.md; executed command names below may be historical.
 
 The editable source is `../phase-tracker/plan.json`; the browser view is
@@ -14,15 +24,23 @@ Latest executed offline regression checkpoint (October 13): **639 passed, 1 live
 
 The initial reconciliation made no new provider, cloud evaluation, Storage or database calls. Subsequent Phase 3 acceptance uploaded fictional cases and scripted results to LangSmith, then ran explicitly approved live PDF evaluations and focused reruns. Total paid attempts: 16 answer, 7 judge and 16 query-embedding invocations. Reviewed checked book content was uploaded with explicit permission; original images stayed out of LangSmith. Live/cloud steps below are historical executions backed by saved reports; paid/upload commands are references and require their own scope/approval before any new run. Commands/functions are summarized; module paths and flags should be checked before execution.
 
-## Main platform blueprint
+## Main platform blueprint — current fork policy
 
-**LangChain, LangGraph and LangSmith are the main platforms for building and testing this project.**
+**This project contains execution code only. All LLM evaluation, observability and monitoring are handled solely through LangSmith.**
 
-- **LangChain:** model adapters, retrieval, tools and supported guardrail integrations.
-- **LangGraph:** bounded workflows, specialist routing, state and checkpointing as orchestration is introduced. This integration remains planned.
-- **LangSmith:** explicit tracing, versioned evaluation datasets, experiments and feedback.
+- **LangChain:** real supervisor and PDF subagent, delegation tools, model calls, retrieval and registered PII middleware.
+- **LangGraph:** LangChain's internal runtime; no custom graph is planned for this fork.
+- **LangSmith:** the sole external platform for LLM quality evaluation, traces, token/latency/cost visibility and monitoring. Use native platform/SDK integration rather than custom judges, scoring functions, telemetry wrappers or local reporting systems.
 
-Keep local Python checks and pytest small for deterministic boundaries and offline regressions. Use the three platforms rather than adding parallel custom orchestration, tracing or evaluation frameworks. Prefer one simple request path and add graph steps only when the implemented source workflows require them. Paid evaluations and content uploads retain their explicit budgets and data-handling decisions.
+Do not add test suites, fake-model runners, evaluation scripts or monitoring modules to this project. Do not run tests or paid evaluations during development unless the user explicitly changes this direction. Keep only the execution code and controls required for privacy, request validation, citation/schema integrity, source access, deadlines and usage limits.
+
+Implemented API ingress boundary: `POST /questions` sanitizes the visitor question once, screens it and checks input credentials before constructing/invoking the supervisor. Neither agent repeats these input checks. Runtime PII remains exclusively on registered supervisor middleware. The PDF delegation wrapper forwards the PII-checked question unchanged and copies the specialist result through supervisor output hooks without a model rewrite. The API returns answer text and approved citation details; request deadlines and usage limits remain.
+
+The inherited direct-model service and extractive answer adapter have been replaced. The normal successful flow uses one supervisor routing call, one PDF synthesis call and one embedding. This integration has only static source/configuration inspection: no local tests, evaluation, provider calls, monitoring, exports, push or deployment were run.
+
+The runtime support-review judge, local evaluation/test directories and custom observability wrapper have been removed from this fork. A reference copy is preserved outside the project. LangSmith configuration remains available, but this cleanup did not enable tracing, export content or deploy anything. The original Qozon project and production deployment remain unchanged.
+
+Records below describe the inherited original project and superseded commands, not the current fork's active tooling.
 
 ## Phase overview
 
