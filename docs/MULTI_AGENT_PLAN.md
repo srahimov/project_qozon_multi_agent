@@ -25,7 +25,7 @@ LangChain `create_agent()` supplies both agents and executes their registered mi
 
 Keep the conventional named-package layout: `src/qozon_multi_agent/` contains `agents/`, `middleware/`, `api/`, `core/`, `knowledge_base/`, `llm/`, `security/` and `services/`. The package uses the shorter name selected by the user, with Python-compatible underscores. The local package rename updates imports, build metadata, CLI/server entry points, tests and current documentation together.
 
-The package has been renamed. The standalone custom PII middleware, LangChain supervisor, PDF subagent and its tool wrapper are implemented and tested locally. The supervisor-to-PDF tool-message path passes offline checks. The configured supervisor now loads the real Luna client and cloud retriever. The API now invokes the new supervisor path. The single input gate, deterministic checked-question delegation and specialist-answer passthrough are connected. Live/LangSmith acceptance and deployment remain pending.
+The package has been renamed. The standalone custom PII middleware, LangChain supervisor, PDF subagent and its tool wrapper are implemented; earlier offline checks predate the current release. The configured supervisor loads the real Luna client and cloud retriever. The API invokes the new supervisor path. The single input gate, deterministic checked-question delegation and specialist-answer passthrough are connected. The separate Worker is deployed and its health endpoint is confirmed. Live/LangSmith generation-quality acceptance remains pending.
 
 The first bounded real question used four Luna calls but failed at the runner's 30-step cap during middleware completion. Local reproduction needs 33 steps for two supervisor turns; the supervisor now defaults to 64 steps while model/tool call limits stay unchanged. The corrected rerun completed in 9.9 seconds with four Luna calls (3,638 model tokens) and returned a synthesized answer citing physical page 4 after support and source-access checks. Across both attempts, eight model calls were made. That historical supervisor added Markdown emphasis. The current implementation replaces that rewrite with a local passthrough reply; it has not been rerun live. This single question is a development smoke test, not broad quality acceptance. Raw content was not exported to LangSmith and nothing was deployed. The pre-cleanup checkpoint passed 694 tests with one live-model test excluded; that suite is now preserved outside this execution-only project.
 
@@ -110,12 +110,26 @@ The local Python tests, Cloudflare tests, evaluation datasets/runners and custom
 
 The API now uses the agent workflow. Static syntax/import/caller inspection only was performed. No local tests, application requests, provider calls, LangSmith evaluation/export, GitHub push or deployment were performed. The original production deployment remains unchanged.
 
-## Separate deployment preparation
+## Separate Cloudflare deployment
 
 The execution source was published to GitHub as `9ac5ccf`. A Linux/amd64 image
 was built from that revision and uploaded to the separate Cloudflare registry
 repository `qozon-multi-agent-api`; `cloudflare/wrangler.json` pins its immutable
-digest. The new Worker has its own quota namespace and admission key. Worker
-activation awaits explicit approval to install the five runtime secrets.
-No local tests, paid questions or LLM evaluation runs were performed. The original
-`qozon-api` and React website remain separate.
+digest. The new Worker has its own quota namespace and admission key. After the
+user explicitly approved uploading the five runtime secrets, Wrangler deployed
+version `86ab0eca-11b8-4e93-bfec-5194fbf0d284` at
+https://qozon-multi-agent-api.qozontech.workers.dev.
+
+Container application: `a0398398-bc68-44de-b9b8-3fc1b92193cb`.
+Durable Object namespace: `0357ad4ca4ee4659b75cbb10044228cc`.
+The pinned image is Linux/amd64 with one Basic instance maximum, quarter vCPU,
+1 GiB memory and 300-second inactivity timeout. All five secret names are
+confirmed installed without reading their values back. Initial provisioning
+returned a temporary 503; a subsequent health request returned HTTP 200 and
+Cloudflare reported one healthy container with no application health errors.
+
+The health response confirms startup and Supabase configuration, not provider
+connectivity or answer quality. No local tests, paid questions, embedding calls or
+LLM evaluation runs were performed. The original `qozon-api` deployment ID was
+verified unchanged; the React website still targets its existing API. No new
+paid-plan subscription was purchased.

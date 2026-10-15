@@ -104,8 +104,13 @@ published image digest before deploying. A deploy alone reuses the pinned image.
 Current image contains application revision `9ac5ccf` and is published at
 `registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-multi-agent-api:9ac5ccf`.
 Its digest is `sha256:0c243af8a6e37ac440dd09638f1386d7a0585e6973da4a605d22491b57710ada`.
-Image publication is complete; new Worker activation is pending runtime-secret
-approval. No live generation-quality acceptance is claimed.
+The separate Worker is deployed at
+https://qozon-multi-agent-api.qozontech.workers.dev using version
+`86ab0eca-11b8-4e93-bfec-5194fbf0d284`. All five approved runtime secrets are
+installed. After initial provisioning, `/health` returned HTTP 200 and Cloudflare
+reported one healthy Basic container. The endpoint confirms configuration and
+startup; provider connectivity and generation quality were not checked. No local
+tests, paid model calls or LLM evaluations were run for this release.
 
 Required secret names: `OPENAI_API_KEY`, `SUPABASE_URL`,
 `SUPABASE_PUBLISHABLE_KEY`, `LANGSMITH_API_KEY`, `QOZON_QUESTION_LIMIT_KEY`.
