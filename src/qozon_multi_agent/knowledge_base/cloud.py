@@ -9,7 +9,6 @@ from uuid import UUID
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.retrievers import BaseRetriever
-from langsmith import tracing_context
 from pydantic import BaseModel, ConfigDict, Field
 
 from qozon_multi_agent.core.config import Settings
@@ -99,8 +98,7 @@ class CloudPDFRetriever(BaseRetriever):
         try:
             reader = DocumentReader(self.settings, transport=self.transport)
             async with reader.client:
-                with tracing_context(enabled=False):
-                    vector = await self.embeddings.aembed_query(query)
+                vector = await self.embeddings.aembed_query(query)
                 if (len(vector) != 1536 or self.settings.embedding_dimensions != 1536
                         or self.settings.embedding_model_name != "text-embedding-3-small"
                         or not all(isinstance(x, (int, float)) and math.isfinite(x) for x in vector)
@@ -159,8 +157,7 @@ class CloudPDFRetriever(BaseRetriever):
 
     async def retrieve(self, question):
         try:
-            with tracing_context(enabled=False):
-                hits = await self.ainvoke(question, config={"callbacks": []})
+            hits = await self.ainvoke(question)
             evidence, image_selected = [], False
             reader = DocumentReader(self.settings, transport=self.transport)
             async with reader.client:

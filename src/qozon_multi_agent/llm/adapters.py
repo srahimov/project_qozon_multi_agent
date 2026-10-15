@@ -9,7 +9,6 @@ import base64
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from langsmith import tracing_context
 from openai import AuthenticationError, RateLimitError, APIConnectionError, APITimeoutError, NotFoundError
 
 from qozon_multi_agent.core.config import Settings
@@ -33,11 +32,7 @@ class _BufferedOpenAIModel:
 
     async def _invoke(self, messages: list[SystemMessage | HumanMessage]):
         try:
-            with tracing_context(enabled=False):
-                response = await self._client.ainvoke(
-                    messages,
-                    config={"callbacks": []},
-                )
+            response = await self._client.ainvoke(messages)
         except AuthenticationError:
             raise ModelInvocationError("model_authentication_failed") from None
         except RateLimitError:

@@ -15,10 +15,11 @@ import os
 from pathlib import Path
 import sqlite3
 
+from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
-from langsmith import tracing_context
+from langsmith import traceable
 from openai import AuthenticationError, RateLimitError, APIConnectionError, APITimeoutError, BadRequestError
 
 from qozon_multi_agent.core.config import Settings
@@ -32,13 +33,23 @@ class IndexError(Exception):
 
 
 def build_embeddings(settings: Settings) -> OpenAIEmbeddings:
+    load_dotenv(".env", override=False)
     if settings.openai_api_key is None:
         raise IndexError("embedding_key_not_configured")
-    return OpenAIEmbeddings(
+    embeddings = OpenAIEmbeddings(
         model=settings.embedding_model_name, dimensions=settings.embedding_dimensions,
         api_key=settings.openai_api_key, max_retries=0, request_timeout=60,
         chunk_size=32, check_embedding_ctx_length=False,
     )
+    # Embeddings are not LangChain runnables. Trace each actual provider request
+    # with LangSmith's native SDK; cache hits never produce a model-call trace.
+    trace_embedding = traceable(
+        name="OpenAIEmbeddings", run_type="embedding", project_name=settings.langsmith_project,
+        metadata={"ls_provider": "openai", "ls_model_name": settings.embedding_model_name},
+    )
+    embeddings.client.create = trace_embedding(embeddings.client.create)
+    embeddings.async_client.create = trace_embedding(embeddings.async_client.create)
+    return embeddings
 
 
 class CachedEmbeddings(Embeddings):
@@ -69,8 +80,7 @@ class CachedEmbeddings(Embeddings):
             if pending:
                 self.api_batches += 1
                 try:
-                    with tracing_context(enabled=False):
-                        vectors = self.underlying.embed_documents(list(pending.values()))
+                    vectors = self.underlying.embed_documents(list(pending.values()))
                 except AuthenticationError:
                     raise IndexError("embedding_authentication_failed") from None
                 except RateLimitError as error:
@@ -91,8 +101,7 @@ class CachedEmbeddings(Embeddings):
             return [found[key] for key in keys]
 
     def embed_query(self, text):
-        with tracing_context(enabled=False):
-            return self._valid(self.underlying.embed_query(text))
+        return self._valid(self.underlying.embed_query(text))
 
 
 def open_store(directory: Path, collection: str, embeddings: Embeddings, *, create=True):

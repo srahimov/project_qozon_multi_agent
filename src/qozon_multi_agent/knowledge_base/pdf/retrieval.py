@@ -10,7 +10,6 @@ import json
 import re
 from pathlib import Path
 from typing import Protocol
-from langsmith import tracing_context
 from langchain_core.documents import Document
 
 from qozon_multi_agent.core.config import Settings
@@ -176,9 +175,8 @@ class LocalPDFRetriever:
 
     async def _retrieve(self, question: str) -> list[Evidence]:
         try:
-            with tracing_context(enabled=False):
-                results = await self.store.asimilarity_search_with_score(question, k=max(12, self.settings.rag_top_k * 3))
-                lexical_hits = await self.lexical.ainvoke(question, config={"callbacks": []})
+            results = await self.store.asimilarity_search_with_score(question, k=max(12, self.settings.rag_top_k * 3))
+            lexical_hits = await self.lexical.ainvoke(question)
             results = [(hit, 0) for hit in fuse_hits(
                 question, results, lexical_hits, max_distance=self.settings.rag_max_distance)]
             evidence, parents, remaining = [], set(), self.settings.rag_context_characters

@@ -71,8 +71,9 @@ Configure provider/database secrets privately using .env.example. Normal serving
 requires the OpenAI key, output budget and reviewed Supabase index configuration.
 The original PDF remains private; public Q&A uses approved evidence and citations.
 
-LangSmith connection settings remain available for native SDK/platform integration.
-Local tracing defaults off, and this cleanup did not enable or export traces.
+Native LangSmith integration traces model calls to `qozon-multi-agent-production`
+with 100% sampling. Client factories load local `.env` settings for the SDK while
+preserving Cloudflare's injected environment. Inputs and outputs remain hidden.
 Do not add a separate evaluator, trace collector, metric exporter or monitoring
 service to the application. Manage evaluation and monitoring through LangSmith.
 
@@ -124,6 +125,12 @@ per UTC day across this Worker. Its counters are separate from the original API.
 Both applications share the Cloudflare account's paid-plan allowances.
 
 Native LangSmith tracing targets `qozon-multi-agent-production` with inputs and
-outputs hidden. The PDF tool's nested trace block remains disabled; full nested
-trace visibility and generation-quality acceptance are still pending in LangSmith.
-No separate application monitoring or local evaluation code is included.
+outputs hidden and `LANGSMITH_TRACING_SAMPLING_RATE=1.0`. Supervisor and nested PDF
+model calls use LangChain's built-in tracing. The embedding client's sync and
+async provider requests use LangSmith's native `traceable` SDK with the embedding
+run type. This also covers actual indexing requests; cache hits make no paid call.
+Table/image ingestion calls inherit native LangChain tracing as well. No path
+disables nested tracing or clears callbacks. A normal answer produces one routing
+LLM call, one embedding request and one PDF synthesis LLM call. Generation-quality
+acceptance remains in LangSmith. No separate monitoring module or evaluator is
+included.

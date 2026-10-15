@@ -51,11 +51,11 @@ class Settings(BaseSettings):
     rag_max_distance: float = Field(default=0.65, ge=0, le=2)
     rag_context_characters: int = Field(default=16_000, ge=1000, le=100_000)
     rag_publication_manifest: Path = Path("data/pdf-assets/publication.json")
-    langsmith_tracing: bool = Field(default=False, validation_alias="LANGSMITH_TRACING")
+    langsmith_tracing: bool = Field(default=True, validation_alias="LANGSMITH_TRACING")
     langsmith_api_key: SecretStr | None = Field(
         default=None, validation_alias="LANGSMITH_API_KEY", repr=False
     )
-    langsmith_project: str = Field(default="project_qozon", validation_alias="LANGSMITH_PROJECT")
+    langsmith_project: str = Field(default="qozon-multi-agent-production", validation_alias="LANGSMITH_PROJECT")
     langsmith_endpoint: str = Field(
         default="https://api.smith.langchain.com", validation_alias="LANGSMITH_ENDPOINT"
     )

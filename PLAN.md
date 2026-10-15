@@ -32,6 +32,12 @@ The initial reconciliation made no new provider, cloud evaluation, Storage or da
 - **LangGraph:** LangChain's internal runtime; no custom graph is planned for this fork.
 - **LangSmith:** the sole external platform for LLM quality evaluation, traces, token/latency/cost visibility and monitoring. Use native platform/SDK integration rather than custom judges, scoring functions, telemetry wrappers or local reporting systems.
 
+Every model call targets `qozon-multi-agent-production` with native LangChain or
+LangSmith SDK tracing and 100% sampling. This includes supervisor/PDF LLM calls,
+query and indexing embeddings, and offline table/image model calls. Nested
+tracing suppression is removed. Inputs and outputs remain hidden. No separate
+monitoring module is introduced.
+
 Do not add test suites, fake-model runners, evaluation scripts or monitoring modules to this project. Do not run tests or paid evaluations during development unless the user explicitly changes this direction. Keep only the execution code and controls required for privacy, request validation, citation/schema integrity, source access, deadlines and usage limits.
 
 Implemented API ingress boundary: `POST /questions` sanitizes the visitor question once, screens it and checks input credentials before constructing/invoking the supervisor. Neither agent repeats these input checks. Runtime PII remains exclusively on registered supervisor middleware. The PDF delegation wrapper forwards the PII-checked question unchanged and copies the specialist result through supervisor output hooks without a model rewrite. The API returns answer text and approved citation details; request deadlines and usage limits remain.

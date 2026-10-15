@@ -4,6 +4,7 @@ API agents receive this client directly. Approved offline table/image ingestion
 uses the small adapters in adapters.py.
 """
 
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
 from qozon_multi_agent.core.config import Settings
@@ -11,6 +12,9 @@ from qozon_multi_agent.core.config import Settings
 
 def build_chat_client(settings: Settings, *, model_name: str, budget: int | None) -> ChatOpenAI:
     """Client construction makes no request; invocation remains explicit."""
+    # Native LangSmith reads process variables, while Settings also reads .env.
+    # Cloudflare's injected environment always takes precedence over local files.
+    load_dotenv(".env", override=False)
     if settings.openai_api_key is None:
         raise ValueError("openai_key_not_configured")
     if not isinstance(budget, int) or isinstance(budget, bool) or budget <= 0:
@@ -27,5 +31,4 @@ def build_chat_client(settings: Settings, *, model_name: str, budget: int | None
         max_retries=0,
         streaming=False,
         store=False,
-        callbacks=[],
     )

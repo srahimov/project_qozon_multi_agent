@@ -133,3 +133,15 @@ connectivity or answer quality. No local tests, paid questions, embedding calls 
 LLM evaluation runs were performed. The original `qozon-api` deployment ID was
 verified unchanged; the React website still targets its existing API. No new
 paid-plan subscription was purchased.
+
+## Native LangSmith model-call observability
+
+All configured model calls target `qozon-multi-agent-production` with 100%
+sampling. Removed explicit tracing suppression around the PDF agent, cloud/local
+retrieval, embeddings and table/image ingestion. Chat calls use native LangChain
+tracing; synchronous/asynchronous embedding provider requests use LangSmith's
+native `traceable` SDK in the existing embedding factory. Cache hits emit no
+model-call trace because no provider is called. Client factories load local
+`.env` variables for the SDK without overriding Cloudflare's injected values.
+Inputs and outputs remain hidden. There is no custom monitoring module or local
+evaluator, and no new paid call is required to configure observability.

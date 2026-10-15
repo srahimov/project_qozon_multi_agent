@@ -6,7 +6,7 @@ LangSmith, not by an additional judge in this request path. Citation IDs/pages,
 response structure and source access are checked in code, not factual quality.
 No PII middleware is registered on this subagent. It receives checked tasks
 from the supervisor; its result returns through the supervisor's privacy hooks.
-Raw nested traces are disabled until metadata-only agent tracing is integrated.
+Native LangSmith tracing includes this nested workflow; inputs and outputs stay hidden.
 """
 
 import asyncio
@@ -21,7 +21,6 @@ from langchain.agents.structured_output import ToolStrategy
 from langchain.tools import tool
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage
-from langsmith import tracing_context
 from pydantic import BaseModel, ConfigDict, Field
 
 from qozon_multi_agent.api.schemas import QuestionResponse, SourceCitation
@@ -74,7 +73,7 @@ def build_pdf_tool(model: BaseChatModel, retriever, *, timeout_seconds: float = 
     The retriever must provide retrieve_balanced() and validate_evidence().
     Normally: one query embedding and one PDF synthesis call; no quality judge.
     No retry is added here. Each invocation owns its evidence, draft and result.
-    Input sanitization and credential checks belong to the planned API boundary
+    Input sanitization and credential checks belong to the single API boundary
     before the supervisor. Output credential/display checks remain separate.
     """
     if not callable(getattr(retriever, "retrieve_balanced", None)) or not callable(getattr(retriever, "validate_evidence", None)):
@@ -88,51 +87,50 @@ def build_pdf_tool(model: BaseChatModel, retriever, *, timeout_seconds: float = 
         """Ask the indexed book/PDF specialist for a supported answer with approved citations."""
         try:
             async with asyncio.timeout(timeout_seconds):
-                # Planned upstream ingress owns input sanitization/credential checks.
-                with tracing_context(enabled=False):
-                    evidence = await retriever.retrieve_balanced(query)
-                    if not evidence:
-                        return ABSTENTION, QuestionResponse(answer=ABSTENTION).model_dump()
-                    if len(evidence) > 8 or sum(len(item.text) for item in evidence) > 16000:
-                        raise PDFWorkflowError("pdf_evidence_limit")
-                    if count_conflicts(evidence) or negation_conflicts(evidence):
-                        answer = "The retrieved sources conflict. I cannot determine the answer from this evidence."
-                        return answer, QuestionResponse(answer=answer).model_dump()
-                    content: list[str | dict[Any, Any]] = [{"type": "text", "text": json.dumps({
-                        "source_number": n, "physical_pages": item.page_numbers,
-                        "content_type": item.content_type, "evidence": item.text,
-                    })} for n, item in enumerate(evidence, 1)]
-                    for item in evidence:
-                        if item.image is not None:
-                            content.append({"type": "image_url", "image_url": {
-                                "url": "data:image/png;base64," + base64.b64encode(item.image).decode(), "detail": "high",
-                            }})
-                    result = await agent.ainvoke({"messages": [HumanMessage(content=query), HumanMessage(content=content)]})
-                    draft = result.get("structured_response")
-                    if not isinstance(draft, PDFDraft):
-                        raise PDFWorkflowError("invalid_pdf_draft")
-                    if not draft.claims:
-                        return ABSTENTION, QuestionResponse(answer=ABSTENTION).model_dump()
-                    for claim in draft.claims:
-                        if any(number > len(evidence) for number in claim.sources) or re.search(r"\[\s*[sS]\s*\d", claim.text):
-                            raise PDFWorkflowError("invalid_pdf_citation")
-                        cited = [evidence[number - 1] for number in dict.fromkeys(claim.sources)]
-                        page_text = re.sub(r"\b(?:physical\s+)?pages?\s+(?=\d)", "physical pages ",
-                                           claim.text, flags=re.I)
-                        check_pages(page_text, cited)
-                        if check_secrets(claim.text).decision == "block" or not permits_answer_display(claim.text):
-                            raise PDFWorkflowError("unsafe_pdf_answer")
-                    answer = "\n".join(claim.text + " " + " ".join(f"[S{n}]" for n in dict.fromkeys(claim.sources))
-                                       for claim in draft.claims)
-                    used = sorted({n for claim in draft.claims for n in claim.sources})
-                    sources = [SourceCitation(citation_id=f"S{n}", chunk_id=evidence[n-1].chunk_id,
-                        document_id=evidence[n-1].document_id, source=evidence[n-1].source,
-                        physical_pages=list(evidence[n-1].page_numbers), content_type=evidence[n-1].content_type,
-                        asset_id=evidence[n-1].parent_asset_id or None, factually_verified=evidence[n-1].factually_verified,
-                        url=evidence[n-1].url, image_url=evidence[n-1].image_url, structured_url=evidence[n-1].structured_url)
-                        for n in used]
-                    await retriever.validate_evidence(evidence)
-                    return answer, QuestionResponse(answer=answer, sources=sources).model_dump()
+                # Upstream ingress owns input sanitization/credential checks.
+                evidence = await retriever.retrieve_balanced(query)
+                if not evidence:
+                    return ABSTENTION, QuestionResponse(answer=ABSTENTION).model_dump()
+                if len(evidence) > 8 or sum(len(item.text) for item in evidence) > 16000:
+                    raise PDFWorkflowError("pdf_evidence_limit")
+                if count_conflicts(evidence) or negation_conflicts(evidence):
+                    answer = "The retrieved sources conflict. I cannot determine the answer from this evidence."
+                    return answer, QuestionResponse(answer=answer).model_dump()
+                content: list[str | dict[Any, Any]] = [{"type": "text", "text": json.dumps({
+                    "source_number": n, "physical_pages": item.page_numbers,
+                    "content_type": item.content_type, "evidence": item.text,
+                })} for n, item in enumerate(evidence, 1)]
+                for item in evidence:
+                    if item.image is not None:
+                        content.append({"type": "image_url", "image_url": {
+                            "url": "data:image/png;base64," + base64.b64encode(item.image).decode(), "detail": "high",
+                        }})
+                result = await agent.ainvoke({"messages": [HumanMessage(content=query), HumanMessage(content=content)]})
+                draft = result.get("structured_response")
+                if not isinstance(draft, PDFDraft):
+                    raise PDFWorkflowError("invalid_pdf_draft")
+                if not draft.claims:
+                    return ABSTENTION, QuestionResponse(answer=ABSTENTION).model_dump()
+                for claim in draft.claims:
+                    if any(number > len(evidence) for number in claim.sources) or re.search(r"\[\s*[sS]\s*\d", claim.text):
+                        raise PDFWorkflowError("invalid_pdf_citation")
+                    cited = [evidence[number - 1] for number in dict.fromkeys(claim.sources)]
+                    page_text = re.sub(r"\b(?:physical\s+)?pages?\s+(?=\d)", "physical pages ",
+                                       claim.text, flags=re.I)
+                    check_pages(page_text, cited)
+                    if check_secrets(claim.text).decision == "block" or not permits_answer_display(claim.text):
+                        raise PDFWorkflowError("unsafe_pdf_answer")
+                answer = "\n".join(claim.text + " " + " ".join(f"[S{n}]" for n in dict.fromkeys(claim.sources))
+                                   for claim in draft.claims)
+                used = sorted({n for claim in draft.claims for n in claim.sources})
+                sources = [SourceCitation(citation_id=f"S{n}", chunk_id=evidence[n-1].chunk_id,
+                    document_id=evidence[n-1].document_id, source=evidence[n-1].source,
+                    physical_pages=list(evidence[n-1].page_numbers), content_type=evidence[n-1].content_type,
+                    asset_id=evidence[n-1].parent_asset_id or None, factually_verified=evidence[n-1].factually_verified,
+                    url=evidence[n-1].url, image_url=evidence[n-1].image_url, structured_url=evidence[n-1].structured_url)
+                    for n in used]
+                await retriever.validate_evidence(evidence)
+                return answer, QuestionResponse(answer=answer, sources=sources).model_dump()
         except PDFWorkflowError:
             raise
         except TimeoutError:
