@@ -84,10 +84,10 @@ persistent quotas. Supabase hosts PostgreSQL with pgvector and full-text search.
 The React website is maintained separately; deploying this API does not switch
 the website away from the original API.
 
-`cloudflare/wrangler.json` selects the separate Worker and `../Dockerfile`.
-Wrangler builds a Linux/amd64 image from the project root and pushes it to the
-Cloudflare registry. `.dockerignore` excludes credentials, private corpus and
-local environments. Runtime credentials are supplied separately as Worker
+`cloudflare/wrangler.json` selects the separate Worker and pins its published
+Linux/amd64 image by immutable digest. The image is built from the root
+`Dockerfile` and stored in Cloudflare's registry. `.dockerignore` excludes
+credentials, private corpus and local environments. Runtime credentials are supplied separately as Worker
 secrets through the ignored, private `cloudflare/.env.deploy` file:
 
 ```sh
@@ -95,6 +95,17 @@ cd cloudflare
 npm ci
 npm run deploy -- --secrets-file .env.deploy
 ```
+
+For a future code release, first build and upload a new image using
+`npx wrangler containers build .. --tag qozon-multi-agent-api:YOUR_RELEASE --push`
+from `cloudflare/`, then update `containers[0].image` in `wrangler.json` to the
+published image digest before deploying. A deploy alone reuses the pinned image.
+
+Current image contains application revision `9ac5ccf` and is published at
+`registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-multi-agent-api:9ac5ccf`.
+Its digest is `sha256:0c243af8a6e37ac440dd09638f1386d7a0585e6973da4a605d22491b57710ada`.
+Image publication is complete; new Worker activation is pending runtime-secret
+approval. No live generation-quality acceptance is claimed.
 
 Required secret names: `OPENAI_API_KEY`, `SUPABASE_URL`,
 `SUPABASE_PUBLISHABLE_KEY`, `LANGSMITH_API_KEY`, `QOZON_QUESTION_LIMIT_KEY`.

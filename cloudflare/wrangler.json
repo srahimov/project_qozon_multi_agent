@@ -19,7 +19,7 @@
     {
       "class_name": "QozonBackend",
       "scheduling_policy": "default",
-      "image": "../Dockerfile",
+      "image": "registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-multi-agent-api@sha256:0c243af8a6e37ac440dd09638f1386d7a0585e6973da4a605d22491b57710ada",
       "instance_type": "basic",
       "max_instances": 1
     }

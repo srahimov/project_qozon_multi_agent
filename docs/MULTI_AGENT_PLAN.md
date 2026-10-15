@@ -109,3 +109,13 @@ The local Python tests, Cloudflare tests, evaluation datasets/runners and custom
 ## Current API integration checkpoint
 
 The API now uses the agent workflow. Static syntax/import/caller inspection only was performed. No local tests, application requests, provider calls, LangSmith evaluation/export, GitHub push or deployment were performed. The original production deployment remains unchanged.
+
+## Separate deployment preparation
+
+The execution source was published to GitHub as `9ac5ccf`. A Linux/amd64 image
+was built from that revision and uploaded to the separate Cloudflare registry
+repository `qozon-multi-agent-api`; `cloudflare/wrangler.json` pins its immutable
+digest. The new Worker has its own quota namespace and admission key. Worker
+activation awaits explicit approval to install the five runtime secrets.
+No local tests, paid questions or LLM evaluation runs were performed. The original
+`qozon-api` and React website remain separate.
