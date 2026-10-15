@@ -102,12 +102,12 @@ For a future code release, first build and upload a new image using
 from `cloudflare/`, then update `containers[0].image` in `wrangler.json` to the
 published image digest before deploying. A deploy alone reuses the pinned image.
 
-Current image contains application revision `9ac5ccf` and is published at
-`registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-multi-agent-api:9ac5ccf`.
-Its digest is `sha256:0c243af8a6e37ac440dd09638f1386d7a0585e6973da4a605d22491b57710ada`.
+Current image contains application revision `ce016cb` and is published at
+`registry.cloudflare.com/b0668461560fc6ead1ad55345b3437c4/qozon-multi-agent-api:ce016cb`.
+Its digest is `sha256:beb84196cb0799fd88037f50ed4730efb84d326efd62d18afd5354b6db198e0d`.
 The separate Worker is deployed at
 https://qozon-multi-agent-api.qozontech.workers.dev using version
-`86ab0eca-11b8-4e93-bfec-5194fbf0d284`. All five approved runtime secrets are
+`e6f363d5-e887-48e2-bb0f-d26cc70ef23c`. All five approved runtime secrets are
 installed. After initial provisioning, `/health` returned HTTP 200 and Cloudflare
 reported one healthy Basic container. The endpoint confirms configuration and
 startup; provider connectivity and generation quality were not checked. No local

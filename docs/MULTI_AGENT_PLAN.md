@@ -145,3 +145,12 @@ model-call trace because no provider is called. Client factories load local
 `.env` variables for the SDK without overriding Cloudflare's injected values.
 Inputs and outputs remain hidden. There is no custom monitoring module or local
 evaluator, and no new paid call is required to configure observability.
+
+Tracing release: application revision `ce016cb`, pinned in
+`cloudflare/wrangler.json` at image digest
+`sha256:beb84196cb0799fd88037f50ed4730efb84d326efd62d18afd5354b6db198e0d`.
+Worker version `e6f363d5-e887-48e2-bb0f-d26cc70ef23c` is deployed; `/health`
+returned HTTP 200 and Cloudflare reports the new image healthy. Existing secrets
+were retained. LangSmith project access was confirmed using read-only metadata.
+No local tests, synthetic traces or paid model calls were made for this change;
+the first new real question will exercise the newly enabled nested tracing.
